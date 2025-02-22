@@ -9,16 +9,18 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Authentication with JWT
+// Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var keyString = jwtSettings["Key"];
 if (string.IsNullOrEmpty(keyString))
 {
     throw new InvalidOperationException("JWT Key is not configured.");
 }
+
 var key = Encoding.UTF8.GetBytes(keyString);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -35,12 +37,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
+
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers(
-);
+// Add Controllers
+builder.Services.AddControllers();
 
-// Swagger
+// Configure Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "UsersTasks API", Version = "v1" });
@@ -70,17 +73,24 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Repositories
+// Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
-// Services
+// Register Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
+
+// Configure Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -88,11 +98,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

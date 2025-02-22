@@ -1,8 +1,3 @@
-# Compiled output
-/bin
-/obj
-/publish
-
 # Dependencies
 /packages
 /node_modules
@@ -20,6 +15,37 @@
 *.testsettings
 *.rptproj
 *.ide-configs
+
+# Ignore build outputs and binaries
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Ignore SQLite database files
+*.db
+*.db-shm
+*.db-wal
+*.mdf
+*.ldf
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Aa][Rr][Mm]86/
+[Bb]uild/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
 # Temporary files
 *.tmp
